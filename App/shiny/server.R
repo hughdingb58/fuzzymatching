@@ -66,9 +66,9 @@ get_hyphen_caps <- function(index, first_matches, middle_matches,
 
 get_rule_rows <- function(bus_file, rule_func) {
   lapply(1:nrow(bus_file), function(i) {
-    rule_func(i, bus_file$`Beneficiary/Client First Name`,
-              bus_file$`Beneficiary/Client Middle Name (if any)`,
-              bus_file$`Beneficiary/Client Last Name`)
+    rule_func(i, bus_file$`first name`,
+              bus_file$`middle name`,
+              bus_file$`last name`)
   }) %>%
     unlist()
 }
@@ -92,10 +92,10 @@ get_error_table <- function(error_col_name, bus_table) {
     matched_rows <- as.numeric(list_matched_rows[[i]]) - 1
     lapply(matched_rows, function(j) {
       matched_pair <- c(which_rows[i], j)
-      first_names <- bus_table$`Beneficiary/Client First Name`
-      middle_names <- bus_table$`Beneficiary/Client Middle Name (if any)`
-      last_names <- bus_table$`Beneficiary/Client Last Name`
-      addresses <- bus_table$`Beneficiary/Client Street Address`
+      first_names <- bus_table$`first name`
+      middle_names <- bus_table$`middle name`
+      last_names <- bus_table$`last name`
+      addresses <- bus_table$`street address`
       tibble("Row number" = c(matched_pair, ""),
              "First name" = c(first_names[matched_pair], ""),
              "Middle name" = c(middle_names[matched_pair], ""),
@@ -139,11 +139,11 @@ function(input, output) {
     hyphen_caps <- get_rule_rows(bus_file, get_hyphen_caps)
     bus_file$`Rows with identical names except for hyphens or capitalization` <- hyphen_caps
     
-    full_names <- paste(bus_file$`Beneficiary/Client First Name`,
-                        bus_file$`Beneficiary/Client Middle Name (if any)`,
-                        bus_file$`Beneficiary/Client Last Name`)
+    full_names <- paste(bus_file$`first name`,
+                        bus_file$`middle name`,
+                        bus_file$`last name`)
     fuzzy_matches <- lapply(1:nrow(bus_file), function(i) {
-      get_fuzzy_matches(i, full_names, bus_file$`Beneficiary/Client Street Address`,
+      get_fuzzy_matches(i, full_names, bus_file$`street address`,
                         input$margin)
     }) %>%
       unlist()
@@ -155,7 +155,7 @@ function(input, output) {
     
     bus_data(bus_file)
     
-    full_matches_table <- lapply(colnames(bus_file)[17:ncol(bus_file)],
+    full_matches_table <- lapply(colnames(bus_file)[11:ncol(bus_file)],
                                  get_error_table, bus_table = bus_file) %>%
       bind_rows()
     bus_matches(full_matches_table)
@@ -174,7 +174,7 @@ function(input, output) {
                cols = 1:ncol(bus_data()), rows = 1,
                style = createStyle(textDecoration = "bold"))
       addStyle(new_workbook, "data",
-               cols = 17:ncol(bus_data()),
+               cols = 11:ncol(bus_data()),
                rows = seq_len(nrow(bus_data())) + 1, gridExpand = TRUE,
                style = createStyle(border = "TopBottomLeftRight",
                                    fgFill = "yellow"))
